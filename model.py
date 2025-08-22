@@ -8,14 +8,20 @@ import numpy as np
 
 # Load the CSV
 data = pd.read_csv("nepse_index_last365.csv")
+data["Volume"] = data["Volume"].replace(",", "", regex=True).astype(float)
 print(data.head())
 prices = data["Close"].values
+volumes = data["Volume"].values
 
-# Prepare dataset with window=2 for demo (use larger windows with more data)
+# Prepare dataset with window=3 for demo (use larger windows with more data)
 window_size = 3
 X, y = [], []
 for i in range(len(prices) - window_size):
-    X.append(prices[i:i + window_size])
+    features = []
+    for j in range(window_size):
+        features.append(prices[i+j])
+        features.append(volumes[i+j])
+    X.append(features)
     y.append(prices[i + window_size])
 
 X, y = np.array(X), np.array(y)
@@ -40,7 +46,11 @@ preds = model.predict(X_test_poly)
 rmse = np.sqrt(mean_squared_error(y_test, preds))
 
 # Predict tomorrow
-tomorrow_input = prices[-window_size:].reshape(1, -1) #comverts to 2D array, 1 row and detect colums automatically 
+tomorrow_input =[]
+for j in range(window_size):
+    tomorrow_input.append(prices[-window_size+j])
+    tomorrow_input.append(volumes[-window_size+j])
+tomorrow_input = np.array(tomorrow_input).reshape(1, -1) #comverts to 2D array, 1 row and detect colums automatically 
 tomorrow_pred = model.predict(poly.transform(tomorrow_input))[0] #that 0 turns it to scalar from array
 
 # Create next day's date (assuming consecutive days)
