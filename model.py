@@ -7,14 +7,14 @@ import matplotlib.dates as mdates
 import numpy as np
 
 # Load the CSV
-data = pd.read_csv("nepse_index_last365.csv")
+data = pd.read_csv("nepse_daily_20250827.csv")
 data["Volume"] = data["Volume"].replace(",", "", regex=True).astype(float)
 print(data.head())
 prices = data["Close"].values
 volumes = data["Volume"].values
 
 # Prepare dataset with window=3 for demo (use larger windows with more data)
-window_size = 3
+window_size = 5
 X, y = [], []
 for i in range(len(prices) - window_size):
     features = []
@@ -27,7 +27,7 @@ for i in range(len(prices) - window_size):
 X, y = np.array(X), np.array(y)
 
 # Train/Test split
-split = int(0.8 * len(X)) or len(X) - 1  # Use all but last sample for training
+split = len(X) - 1  # Use all but last sample for training
 X_train, X_test = X[:split], X[split:]
 y_train, y_test = y[:split], y[split:]
 
